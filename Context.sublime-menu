@@ -1,6 +1,6 @@
 [{
     "id": "svncommit",
-    "caption": "SVNCommit",
+    "caption": "SVN Commit",
     "mnemonic": "V",
     "children":
     	[
