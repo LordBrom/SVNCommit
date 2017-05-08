@@ -9,6 +9,7 @@
 		{ "caption": "Commit to SVN (Last Comment)…", "command": "svn_commit_last" },
 		{ "caption": "Commit to SVN (Blank Comment)…", "command": "svn_commit_blank" },
 		{ "caption": "Commit to SVN (History)…", "command": "svn_commit_history" },
+		{ "caption": "-" },
 		{ "caption": "Show changes in file", "command": "svn_show_changes" },
 		{ "caption": "Discard changes in file", "command": "svn_discard_changes" },
 		{ "caption": "Update repository", "command": "svn_update_repo" },
