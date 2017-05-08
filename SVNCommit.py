@@ -46,17 +46,21 @@ class svnController():
 			return repoPath
 
 	def get_svn_dir(self):
-		self.svnDir = sublime.active_window().active_view().file_name( ).split( "\\" )
+		try:
+			self.svnDir = sublime.active_window().active_view().file_name( ).split( "\\" )
 
-		svnFound = 0
-		while 0 == svnFound and 0 != len( self.svnDir ):
-			self.svnDir = self.svnDir[:-1]
-			currentDir = "\\".join( self.svnDir )
+			svnFound = 0
+			while 0 == svnFound and 0 != len( self.svnDir ):
+				self.svnDir = self.svnDir[:-1]
+				currentDir = "\\".join( self.svnDir )
 
-			if os.path.isdir( currentDir + "\\.svn" ):
-				svnFound = 1
+				if os.path.isdir( currentDir + "\\.svn" ):
+					svnFound = 1
 
-		if 0 == svnFound:
+			if 0 == svnFound:
+				sublime.status_message( "SVN project not found." );
+				return ""
+		except:
 			sublime.status_message( "SVN project not found." );
 			return ""
 
@@ -67,12 +71,16 @@ class svnController():
 		startupinfo = subprocess.STARTUPINFO()
 		startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 
-		proc = subprocess.Popen(
-					params,
-					stdin=subprocess.PIPE,
-					stdout=subprocess.PIPE,
-					stderr=subprocess.STDOUT,
-					startupinfo=startupinfo);
+		try:
+			proc = subprocess.Popen(
+						params,
+						stdin=subprocess.PIPE,
+						stdout=subprocess.PIPE,
+						stderr=subprocess.STDOUT,
+						startupinfo=startupinfo);
+		except:
+			sublime.status_message( "SVN command failed." );
+			return ""
 		return proc.communicate()[0];
 
 	def get_history(self):
@@ -235,6 +243,10 @@ class svnShowChangesCommand(sublime_plugin.TextCommand, svnController):
 
 class svnDiscardChangesCommand(sublime_plugin.TextCommand, svnController):
 	def run(self, edit):
+		self.svnDir = self.get_svn_dir();
+		if len(self.svnDir) == 0:
+			return;
+
 		sublime.status_message("Are you sure you want to discard your changes?");
 		self.confirmList = ['No, keep changes.', 'Yes, discard changes']
 		sublime.active_window().show_quick_panel(self.confirmList, self.discard)
@@ -246,9 +258,6 @@ class svnDiscardChangesCommand(sublime_plugin.TextCommand, svnController):
 			return
 		else:
 			sublime.active_window().run_command("save")
-			self.svnDir = self.get_svn_dir();
-			if len(self.svnDir) == 0:
-				return;
 
 			self.svnDir = self.get_scoped_path('file');
 
@@ -269,15 +278,15 @@ class svnDiscardChangesCommand(sublime_plugin.TextCommand, svnController):
 
 class svnUpdateRepoCommand(sublime_plugin.TextCommand, svnController):
 	def run(self, edit):
+		self.svnDir = self.get_svn_dir();
+		if len(self.svnDir) == 0:
+			return;
+		self.edit = edit;
 		sublime.status_message("Select update scope");
 		self.confirmList = list(sublime.avibeSVNScopes)
 		sublime.active_window().show_quick_panel(self.confirmList, self.do_Update)
 
 	def do_Update(self, index):
-		self.svnDir = self.get_svn_dir();
-		if len(self.svnDir) == 0:
-			return;
-
 		self.scope = ''
 		if index == -1 :
 			return
@@ -291,15 +300,17 @@ class svnUpdateRepoCommand(sublime_plugin.TextCommand, svnController):
 			self.svnDir = self.get_scoped_path('dir')
 			self.scope = 'Directory'
 
-
-		procText = self.run_svn_command([ "svn", "update", self.svnDir]);
-		procText = procText.strip( ).split( '\n' )[-1].strip( );
+		procTextPre = self.run_svn_command([ "svn", "update", self.svnDir]);
+		procText = procTextPre.strip( ).split( '\n' )[-1].strip( );
 
 		if "At revision" in procText:
 			procText = self.scope + " is already up to date."
 		elif "Updated" in procText:
 			view = sublime.active_window().active_view();
 			sublime.set_timeout(functools.partial(view.run_command, 'revert'), 0)
+
+			newWindow = sublime.active_window().new_file();
+			newWindow.insert(self.edit, 0, procTextPre);
 		else:
 			procText = "Could not commit revision; check for conflicts or other issues."
 
