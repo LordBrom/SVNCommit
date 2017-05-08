@@ -1,0 +1,9 @@
+[
+	{ "keys": ["ctrl+alt+b","ctrl+alt+b"], "command": "svn_commit"          },
+	{ "keys": ["ctrl+alt+b","ctrl+alt+v"], "command": "svn_commit_last"     },
+	{ "keys": ["ctrl+alt+b","ctrl+alt+c"], "command": "svn_commit_blank"    },
+	{ "keys": ["ctrl+alt+b","ctrl+alt+h"], "command": "svn_commit_history"  },
+	{ "keys": ["ctrl+alt+b","ctrl+alt+d"], "command": "svn_show_changes"    },
+	{ "keys": ["ctrl+alt+d","ctrl+alt+d"], "command": "svn_discard_changes" },
+	{ "keys": ["ctrl+alt+b","ctrl+alt+u"], "command": "svn_update_repo"     }
+]
