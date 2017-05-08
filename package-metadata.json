@@ -1,5 +1,5 @@
 {
-	"url" :"",
+    "url" :"https://github.com/LordBrom/SVNCommit",
     "description": "Sublime Text plugin to interact with SVN.",
     "platforms": ["*"],
     "version": "1.3",
