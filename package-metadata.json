@@ -2,7 +2,7 @@
     "url" :"https://github.com/LordBrom/SVNCommit",
     "description": "Sublime Text 2 plugin to interact with SVN.",
     "platforms": ["*"],
-    "version": "1.3",
+    "version": "1.3.2",
     "sublime_text": "*",
     "dependencies": []
 }
