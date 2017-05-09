@@ -79,13 +79,13 @@
                 },{
                     "command": "open_file",
                     "args": {
-                        "file": "${packages}/SVNCommit/SVNCommit.sublime-settings"
+                        "file": "${packages}/SVNCommit/Preferences.sublime-settings"
                     },
                     "caption": "Settings – Default"
                 },{
                     "command": "open_file",
                     "args": {
-                        "file": "${packages}/User/SVNCommit.sublime-settings"
+                        "file": "${packages}/User/Preferences.sublime-settings"
                     },
                     "caption": "Settings – User"
                 },{ 
