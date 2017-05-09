@@ -10,11 +10,11 @@
             "children": 
             [
                 {
-                    "command": "set_setting", "args": {"setting": "SVN.commit_scope", "value": "repo"}, "caption": "Repository"
+                    "command": "set_setting", "args": {"setting": "SVN.commit_scope", "value": "repo"}, "caption": "Repository", "checkbox": "true"
                 },{
-                    "command": "set_setting", "args": {"setting": "SVN.commit_scope", "value": "file"}, "caption": "File"
+                    "command": "set_setting", "args": {"setting": "SVN.commit_scope", "value": "file"}, "caption": "File", "checkbox": "true"
                 },{
-                    "command": "set_setting", "args": {"setting": "SVN.commit_scope", "value": "dir" }, "caption": "Directory"
+                    "command": "set_setting", "args": {"setting": "SVN.commit_scope", "value": "dir" }, "caption": "Directory", "checkbox": "true"
                 }
             ]
         },
