@@ -325,7 +325,6 @@ class svnAddFileCommand(sublime_plugin.TextCommand, svnController):
 		self.confirmList = ['Add current file to repo', 'Add current directory to repo']
 		sublime.active_window().show_quick_panel(self.confirmList, self.do_Add)
 
-
 	def do_Add(self, index):
 		print('added')
 		self.scope = ''
