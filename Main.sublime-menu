@@ -47,6 +47,36 @@
                 [{ 
                     "caption": "-" 
                 },{
+                    "caption": "Commit Scope",
+                    "mnemonic": "s",
+                    "children": 
+                    [
+                        {
+                            "command": "set_setting",
+                            "args": {
+                                "setting": "commit_scope",
+                                "value": "repo"
+                            },
+                            "caption": "Repository"
+                        },{
+                            "command": "set_setting",
+                            "args": {
+                                "setting": "commit_scope",
+                                "value": "file"
+                            },
+                            "caption": "File"
+                        },{
+                            "command": "set_setting",
+                            "args": {
+                                "setting": "commit_scope",
+                                "value": "dir"
+                            },
+                            "caption": "Directory"
+                        }
+                    ]
+                },{
+                    "caption": "-" 
+                },{
                     "command": "open_file",
                     "args": {
                         "file": "${packages}/SVNCommit/SVNCommit.sublime-settings"
