@@ -12,12 +12,12 @@ sublime.avibeSVNScopes = ['Full Repository','Current File','Current Directory']
 
 class svnController():
 	def get_commit_scope(self):
-		s = sublime.load_settings('SVNCommit.sublime-settings')
+		s = sublime.load_settings('Preferences.sublime-settings')
 
-		if not s.has('commit_scope'):
+		if not s.has('SVN.commit_scope'):
 			return 'repo'
 		else:
-			return s.get('commit_scope')
+			return s.get('SVN.commit_scope')
 
 	def get_svn_root_path(self):
 		path = sublime.active_window().active_view().file_name( ).split( "\\" )
@@ -84,17 +84,17 @@ class svnController():
 		return proc.communicate()[0];
 
 	def get_history(self):
-		s = sublime.load_settings('SVNCommit.sublime-settings')
+		s = sublime.load_settings('Preferences.sublime-settings')
 
-		if not s.has('history'):
-			s.set('history', [])
-			sublime.save_settings('SVNCommit.sublime-settings')
+		if not s.has('SVN.history'):
+			s.set('SVN.history', [])
+			sublime.save_settings('Preferences.sublime-settings')
 
-		return s.get('history')
+		return s.get('SVN.history')
 
 	def add_history(self, log):
-		s = sublime.load_settings('SVNCommit.sublime-settings')
-		history = s.get('history')
+		s = sublime.load_settings('Preferences.sublime-settings')
+		history = s.get('SVN.history')
 
 		for item in list(history):
 			if item == log:
@@ -103,8 +103,8 @@ class svnController():
 		history.reverse()
 		history.append(log);
 		history.reverse();
-		s.set('history', history)
-		sublime.save_settings('SVNCommit.sublime-settings')
+		s.set('SVN.history', history)
+		sublime.save_settings('Preferences.sublime-settings')
 		
 class svnCommitCommand(sublime_plugin.TextCommand, svnController):
 	def run(self, edit):
@@ -347,3 +347,15 @@ class svnAddFileCommand(sublime_plugin.TextCommand, svnController):
 			print(procText)
 			procText = "Added file(s) to repo"
 		sublime.status_message(procText);
+
+class svnTestCommand(sublime_plugin.TextCommand, svnController):
+	def run(self, edit):
+		view = sublime.active_window().active_view()
+		print(str(self.get_commit_scope()))
+
+class svnSetScopeCommand(sublime_plugin.TextCommand, svnController):
+	def run(self, edit, scope):
+		print(scope)
+		s = sublime.load_settings('Preferences.sublime-settings')
+		s.set('SVN.commit_scope', scope)
+		sublime.save_settings('Preferences.sublime-settings')
