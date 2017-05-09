@@ -5,5 +5,6 @@
     { "caption": "SVN: Commit to SVN (History)…",       "command": "svn_commit_history" },
     { "caption": "SVN: Show changes in file",           "command": "svn_show_changes" },
     { "caption": "SVN: Discard changes in file…",       "command": "svn_discard_changes" },
-    { "caption": "SVN: Update repository…",             "command": "svn_update_repo" }
+    { "caption": "SVN: Update repository…",             "command": "svn_update_repo" },
+    { "caption": "SVN: Add file to repository",         "command": "svn_add_file" }
 ]
