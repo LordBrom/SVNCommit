@@ -1,0 +1,4 @@
+{
+	"SVN.commit_scope": "file", /* file|repo|dir */
+	"SVN.history": []
+}
