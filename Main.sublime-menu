@@ -24,6 +24,7 @@
 					{ "caption": "Show changes in file",           "command": "svn_show_changes"    },
 					{ "caption": "Discard changes in file",        "command": "svn_discard_changes" },
 					{ "caption": "Update repository",              "command": "svn_update_repo"     },
+					{ "caption": "Add file to repository",         "command": "svn_add_file"     },
                     { "caption": "-", "id": "end" }
 				]
 			}]
