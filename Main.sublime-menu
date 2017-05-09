@@ -52,56 +52,25 @@
                     "children": 
                     [
                         {
-                            "command": "set_setting",
-                            "args": {
-                                "setting": "commit_scope",
-                                "value": "repo"
-                            },
-                            "caption": "Repository"
+                            "command": "set_setting", "args": {"setting": "SVN.commit_scope", "value": "repo"}, "caption": "Repository", "checkbox": "true"
                         },{
-                            "command": "set_setting",
-                            "args": {
-                                "setting": "commit_scope",
-                                "value": "file"
-                            },
-                            "caption": "File"
+                            "command": "set_setting", "args": {"setting": "SVN.commit_scope", "value": "file"}, "caption": "File", "checkbox": "true"
                         },{
-                            "command": "set_setting",
-                            "args": {
-                                "setting": "commit_scope",
-                                "value": "dir"
-                            },
-                            "caption": "Directory"
+                            "command": "set_setting", "args": {"setting": "SVN.commit_scope", "value": "dir" }, "caption": "Directory", "checkbox": "true"
                         }
                     ]
                 },{
                     "caption": "-" 
                 },{
-                    "command": "open_file",
-                    "args": {
-                        "file": "${packages}/SVNCommit/Preferences.sublime-settings"
-                    },
-                    "caption": "Settings – Default"
+                    "command": "open_file", "args": {"file": "${packages}/SVNCommit/Preferences.sublime-settings"},"caption": "Settings – Default"
                 },{
-                    "command": "open_file",
-                    "args": {
-                        "file": "${packages}/User/Preferences.sublime-settings"
-                    },
-                    "caption": "Settings – User"
+                    "command": "open_file", "args": {"file": "${packages}/User/Preferences.sublime-settings"},"caption": "Settings – User"
                 },{ 
                     "caption": "-" 
                 },{
-                    "command": "open_file",
-                    "args": {
-                        "file": "${packages}/SVNCommit/Default (Windows).sublime-keymap"
-                    },
-                    "caption": "Key Bindings – Default"
+                    "command": "open_file", "args": {"file": "${packages}/SVNCommit/Default (Windows).sublime-keymap"},"caption": "Key Bindings – Default"
                 },{
-                    "command": "open_file",
-                    "args": {
-                        "file": "${packages}/User/Default (Windows).sublime-keymap"
-                    },
-                    "caption": "Key Bindings – User"
+                    "command": "open_file", "args": {"file": "${packages}/User/Default (Windows).sublime-keymap"},"caption": "Key Bindings – User"
                 },{ 
                     "caption": "-" 
                 }]

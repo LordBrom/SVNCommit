@@ -12,12 +12,15 @@ sublime.avibeSVNScopes = ['Full Repository','Current File','Current Directory']
 
 class svnController():
 	def get_commit_scope(self):
-		s = sublime.load_settings('Preferences.sublime-settings')
-
-		if not s.has('SVN.commit_scope'):
-			return 'repo'
+		viewSettings = sublime.active_window().active_view().settings()
+		if not viewSettings.has('SVN.commit_scope'):
+			s = sublime.load_settings('Preferences.sublime-settings')
+			if not s.has('SVN.commit_scope'):
+				return 'repo'
+			else:
+				return s.get('SVN.commit_scope')
 		else:
-			return s.get('SVN.commit_scope')
+			return viewSettings.get('SVN.commit_scope')
 
 	def get_svn_root_path(self):
 		path = sublime.active_window().active_view().file_name( ).split( "\\" )
@@ -351,6 +354,7 @@ class svnAddFileCommand(sublime_plugin.TextCommand, svnController):
 class svnTestCommand(sublime_plugin.TextCommand, svnController):
 	def run(self, edit):
 		view = sublime.active_window().active_view()
+
 		print(str(self.get_commit_scope()))
 
 class svnSetScopeCommand(sublime_plugin.TextCommand, svnController):
@@ -359,3 +363,8 @@ class svnSetScopeCommand(sublime_plugin.TextCommand, svnController):
 		s = sublime.load_settings('Preferences.sublime-settings')
 		s.set('SVN.commit_scope', scope)
 		sublime.save_settings('Preferences.sublime-settings')
+
+
+class MyCheckableCommand(sublime_plugin.WindowCommand):
+	def is_checked(self):
+		s = sublime.load_settings('Preferences.sublime-settings')

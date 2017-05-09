@@ -7,7 +7,7 @@
     { "caption": "SVN: Discard changes in file…",       "command": "svn_discard_changes"                                                       },
     { "caption": "SVN: Update repository…",             "command": "svn_update_repo"                                                           },
     { "caption": "SVN: Add file to repository",         "command": "svn_add_file"                                                              },
-    { "caption": "SVN: Set scope: repository",          "command": "set_setting",         "args": {"setting": "commit_scope", "value": "repo"} },
-    { "caption": "SVN: Set scope: file ",               "command": "set_setting",         "args": {"setting": "commit_scope", "value": "file"} },
-    { "caption": "SVN: Set scope: directory ",          "command": "set_setting",         "args": {"setting": "commit_scope", "value": "dir" } }
+    { "caption": "SVN: Set scope: repository",          "command": "set_setting",         "args": {"setting": "SVN.commit_scope", "value": "repo"} },
+    { "caption": "SVN: Set scope: file ",               "command": "set_setting",         "args": {"setting": "SVN.commit_scope", "value": "file"} },
+    { "caption": "SVN: Set scope: directory ",          "command": "set_setting",         "args": {"setting": "SVN.commit_scope", "value": "dir" } }
 ]
