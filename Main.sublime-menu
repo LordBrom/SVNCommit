@@ -11,7 +11,7 @@
             "children":
             [{
                 "id": "svncommit",
-                "caption": "SVNCommit",
+                "caption": "SVN Tools",
                 "mnemonic": "V",
                 "children":
                 [
@@ -41,7 +41,7 @@
             "id": "package-settings",
             "children": 
             [{
-            	"caption": "SVN Commit",
+            	"caption": "SVN Tools",
            		"mnemonic": "V",
                 "children": 
                 [{ 
