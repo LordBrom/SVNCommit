@@ -145,6 +145,9 @@ class svnCommitCommand(sublime_plugin.TextCommand, svnController):
 
 		sublime.status_message( procText + " (" + sublime.avibeSVNCommitLastComment + ")" );
 
+	def is_enabled(self):
+		return len(str(self.get_svn_dir())) != 0
+
 class svnCommitLastCommand(sublime_plugin.TextCommand, svnController):
 	def run(self, edit):
 		self.svnDir = self.get_svn_dir()
@@ -168,6 +171,9 @@ class svnCommitLastCommand(sublime_plugin.TextCommand, svnController):
 
 		sublime.status_message( procText + " (" + sublime.avibeSVNCommitLastComment + ")" );
 
+	def is_enabled(self):
+		return len(str(self.get_svn_dir())) != 0
+
 class svnCommitBlankCommand(sublime_plugin.TextCommand, svnController):
 	def run(self, edit):
 		self.svnDir = self.get_svn_dir()
@@ -185,6 +191,9 @@ class svnCommitBlankCommand(sublime_plugin.TextCommand, svnController):
 			procText = "Could not commit revision; check for conflicts or other issues."
 
 		sublime.status_message( procText );
+
+	def is_enabled(self):
+		return len(str(self.get_svn_dir())) != 0
 
 class svnCommitHistoryCommand(sublime_plugin.TextCommand, svnController):
 	def run(self, edit):
@@ -223,6 +232,9 @@ class svnCommitHistoryCommand(sublime_plugin.TextCommand, svnController):
 		except ValueError:
 			pass
 
+	def is_enabled(self):
+		return len(str(self.get_svn_dir())) != 0
+
 class svnShowChangesCommand(sublime_plugin.TextCommand, svnController):
 	def run(self, edit):
 		self.svnDir = self.get_svn_dir();
@@ -239,6 +251,9 @@ class svnShowChangesCommand(sublime_plugin.TextCommand, svnController):
 			newWindow.set_syntax_file("Packages/Diff/Diff.tmLanguage");
 		else:
 			sublime.status_message("The files match.");	
+
+	def is_enabled(self):
+		return len(str(self.get_svn_dir())) != 0
 
 class svnDiscardChangesCommand(sublime_plugin.TextCommand, svnController):
 	def run(self, edit):
@@ -274,6 +289,9 @@ class svnDiscardChangesCommand(sublime_plugin.TextCommand, svnController):
 				sublime.set_timeout(functools.partial(view.run_command, 'revert'), 0)
 
 			sublime.status_message(procText);
+
+	def is_enabled(self):
+		return len(str(self.get_svn_dir())) != 0
 
 class svnUpdateRepoCommand(sublime_plugin.TextCommand, svnController):
 	def run(self, edit):
@@ -315,6 +333,9 @@ class svnUpdateRepoCommand(sublime_plugin.TextCommand, svnController):
 
 		sublime.status_message(procText);
 
+	def is_enabled(self):
+		return len(str(self.get_svn_dir())) != 0
+
 class svnAddFileCommand(sublime_plugin.TextCommand, svnController):
 	def run(self, edit):
 		self.svnDir = self.get_svn_dir();
@@ -347,9 +368,8 @@ class svnAddFileCommand(sublime_plugin.TextCommand, svnController):
 			procText = "Added file(s) to repo"
 		sublime.status_message(procText);
 
-class svnTestCommand(sublime_plugin.TextCommand, svnController):
-	def run(self, edit):
-		sublime.status_message("Current commit scope set to: " + str(self.get_commit_scope()))
+	def is_enabled(self):
+		return len(str(self.get_svn_dir())) != 0
 
 class svnSetScopeCommand(sublime_plugin.ApplicationCommand, svnController):
 	def run(self, scope):
@@ -360,3 +380,18 @@ class svnSetScopeCommand(sublime_plugin.ApplicationCommand, svnController):
 	def is_checked(self, scope):
 		selScope = self.get_commit_scope()
 		return selScope == scope
+
+
+
+
+
+
+
+
+class svnTestCommand(sublime_plugin.TextCommand, svnController):
+	def run(self, edit):
+		print(str(sublime.active_window().active_view().id()))
+
+class testEventListener(sublime_plugin.EventListener, svnController):
+	def on_new(self, view):
+		print(view.window().id())
