@@ -374,7 +374,14 @@ class svnSetScopeCommand(sublime_plugin.ApplicationCommand, svnController):
 
 
 
-
+class svnEventListener(sublime_plugin.EventListener, svnController):
+	def on_activated(self, view):
+		print('activeEvent')
+		self.svnDir = self.get_svn_dir()
+		if len(self.svnDir) == 0:
+			view.set_status('svnTool', 'no SVN')
+		else:
+			view.set_status('svnTool', 'SVN found')
 
 
 
