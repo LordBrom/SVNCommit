@@ -261,16 +261,7 @@ class svnDiscardChangesCommand(sublime_plugin.TextCommand, svnController):
 		if len(self.svnDir) == 0:
 			return;
 
-		sublime.status_message("Are you sure you want to discard your changes?");
-		self.confirmList = ['No, keep changes.', 'Yes, discard changes']
-		sublime.active_window().show_quick_panel(self.confirmList, self.do_discard)
-
-	def do_discard(self, index):
-		if index == -1 :
-			return
-		elif index == 0:
-			return
-		else:
+		if sublime.ok_cancel_dialog("Are you sure you want to discard your changes?"):
 			sublime.active_window().run_command("save")
 
 			self.svnDir = self.get_scoped_path('file');
@@ -289,7 +280,7 @@ class svnDiscardChangesCommand(sublime_plugin.TextCommand, svnController):
 				sublime.set_timeout(functools.partial(view.run_command, 'revert'), 0)
 
 			sublime.status_message(procText);
-
+			
 	def is_enabled(self):
 		return len(str(self.get_svn_dir())) != 0
 
@@ -390,7 +381,23 @@ class svnSetScopeCommand(sublime_plugin.ApplicationCommand, svnController):
 
 class svnTestCommand(sublime_plugin.TextCommand, svnController):
 	def run(self, edit):
-		print(str(sublime.active_window().active_view().id()))
+		print('starting test command')
+
+		test = sublime.ok_cancel_dialog('test')
+		print(test)
+
+		# self.svnDir = self.get_scoped_path('file')
+		# procText = self.run_svn_command([ "svn", "log", self.svnDir]);
+		# # procText = procText.strip( ).split( '\n' )[0].strip( );
+		# newWindow = sublime.active_window().new_file();
+		# newWindow.insert(edit, 0, procText);
+
+		# print(procText)
+		print('ending test command')
+
+	def do_ok(self):
+		print('test')
+
 
 class testEventListener(sublime_plugin.EventListener, svnController):
 	def on_new(self, view):
