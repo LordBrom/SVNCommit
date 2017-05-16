@@ -376,9 +376,9 @@ class svnEventListener(sublime_plugin.EventListener, svnController):
 	def on_activated(self, view):
 		self.svnDir = self.get_svn_dir()
 		if len(self.svnDir) == 0:
-			view.set_status('AAAsvnTool', 'No SVN')
+			view.set_status('AAAsvnTool', 'SVN:' + u'\u2718')
 		else:
-			view.set_status('AAAsvnTool', 'SVN found' )
+			view.set_status('AAAsvnTool', 'SVN:' + u'\u2714' )
 
 
 
