@@ -1,4 +1,6 @@
 {
 	"SVN.commit_scope": "file", /* file|repo|dir */
-	"SVN.history": []
+	"SVN.history": [],
+	"SVN.show_status_bar_info": 1,
+	"SVN.show_diff_in_status_bar": 0
 }

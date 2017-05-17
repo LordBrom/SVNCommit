@@ -13,10 +13,7 @@ sublime.avibeSVNScopes = ['Full Repository','Current File','Current Directory']
 class svnController():
 	def get_commit_scope(self):
 		s = sublime.load_settings('Preferences.sublime-settings')
-		if not s.has('SVN.commit_scope'):
-			return 'repo'
-		else:
-			return s.get('SVN.commit_scope')
+		return s.get('SVN.commit_scope', 'repo')
 
 	def get_svn_root_path(self):
 		path = sublime.active_window().active_view().file_name( ).split( "\\" )
@@ -83,15 +80,12 @@ class svnController():
 	def get_history(self):
 		s = sublime.load_settings('Preferences.sublime-settings')
 
-		if not s.has('SVN.history'):
-			s.set('SVN.history', [])
-			sublime.save_settings('Preferences.sublime-settings')
-
-		return s.get('SVN.history')
+		return s.get('SVN.history', [])
 
 	def add_history(self, log):
 		s = sublime.load_settings('Preferences.sublime-settings')
-		history = s.get('SVN.history')
+
+		history = s.get('SVN.history', [])
 
 		for item in list(history):
 			if item == log:
@@ -102,6 +96,17 @@ class svnController():
 		history.reverse();
 		s.set('SVN.history', history)
 		sublime.save_settings('Preferences.sublime-settings')
+
+	def show_diff(self):
+		s = sublime.load_settings('Preferences.sublime-settings')
+
+		return s.get('SVN.show_diff_in_status_bar', 0)
+
+	def show_status_bar(self):
+		s = sublime.load_settings('Preferences.sublime-settings')
+
+		return s.get('SVN.show_status_bar_info', 1)
+
 		
 class svnCommitCommand(sublime_plugin.TextCommand, svnController):
 	def run(self, edit):
@@ -372,13 +377,31 @@ class svnSetScopeCommand(sublime_plugin.ApplicationCommand, svnController):
 
 
 
+
 class svnEventListener(sublime_plugin.EventListener, svnController):
 	def on_activated(self, view):
-		self.svnDir = self.get_svn_dir()
-		if len(self.svnDir) == 0:
-			view.set_status('AAAsvnTool', 'SVN:' + u'\u2718')
+		if self.show_status_bar() == 1:
+			self.svnDir = self.get_svn_dir()
+			if len(self.svnDir) == 0:
+				view.set_status('AAAsvnTool', 'SVN:' + u'\u2718')
+				view.set_status('AABsvnTool', '')
+				view.set_status('AACsvnTool', '')
+			else:
+				view.set_status('AAAsvnTool', 'SVN:' + u'\u2714')
+				view.set_status('AABsvnTool', 'Scope: ' + str(self.get_commit_scope()))
+				if self.show_diff() == 1:
+					self.svnDir = self.get_scoped_path('file')
+					procText = self.run_svn_command([ "svn", "diff", self.svnDir]);
+					if len(procText):
+						view.set_status('AACsvnTool', 'diff:' + u'\u2260' )
+					else:
+						view.set_status('AACsvnTool', 'diff:' + u'\u003D' )
+				else: 
+					view.set_status('AACsvnTool', '')
 		else:
-			view.set_status('AAAsvnTool', 'SVN:' + u'\u2714' )
+			view.set_status('AAAsvnTool', '')
+			view.set_status('AABsvnTool', '')
+			view.set_status('AACsvnTool', '')
 
 
 
@@ -388,9 +411,9 @@ class svnEventListener(sublime_plugin.EventListener, svnController):
 class svnTestCommand(sublime_plugin.TextCommand, svnController):
 	def run(self, edit):
 		print('starting test command')
-
-		test = sublime.ok_cancel_dialog('test')
-		print(test)
+		# sublime.active_window().create_output_panel("test")
+		# test = sublime.ok_cancel_dialog('test')
+		# print(test)
 
 		# self.svnDir = self.get_scoped_path('file')
 		# procText = self.run_svn_command([ "svn", "log", self.svnDir]);
