@@ -427,7 +427,3 @@ class svnTestCommand(sublime_plugin.TextCommand, svnController):
 	def do_ok(self):
 		print('test')
 
-
-class testEventListener(sublime_plugin.EventListener, svnController):
-	def on_new(self, view):
-		print(view.window().id())
