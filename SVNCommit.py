@@ -249,9 +249,10 @@ class svnShowChangesCommand(sublime_plugin.TextCommand, svnController):
 		procText = self.run_svn_command([ "svn", "diff", self.svnDir]);
 
 		if len(procText):
-			newWindow = sublime.active_window().new_file();
-			newWindow.insert(edit, 0, procText);
-			newWindow.set_syntax_file("Packages/Diff/Diff.tmLanguage");
+			newView = sublime.active_window().new_file();
+			newView.insert(edit, 0, procText);
+			newView.set_syntax_file("Packages/Diff/Diff.tmLanguage");
+			newView.set_scratch(1);
 		else:
 			sublime.status_message("The files match.");	
 
@@ -320,8 +321,9 @@ class svnUpdateRepoCommand(sublime_plugin.TextCommand, svnController):
 			view = sublime.active_window().active_view();
 			sublime.set_timeout(functools.partial(view.run_command, 'revert'), 0)
 
-			newWindow = sublime.active_window().new_file();
-			newWindow.insert(self.edit, 0, procTextPre);
+			newView = sublime.active_window().new_file();
+			newView.insert(self.edit, 0, procTextPre);
+			newView.set_scratch(1);
 		else:
 			procText = "Could not commit revision; check for conflicts or other issues."
 
@@ -418,8 +420,8 @@ class svnTestCommand(sublime_plugin.TextCommand, svnController):
 		# self.svnDir = self.get_scoped_path('file')
 		# procText = self.run_svn_command([ "svn", "log", self.svnDir]);
 		# # procText = procText.strip( ).split( '\n' )[0].strip( );
-		# newWindow = sublime.active_window().new_file();
-		# newWindow.insert(edit, 0, procText);
+		# newView = sublime.active_window().new_file();
+		# newView.insert(edit, 0, procText);
 
 		# print(procText)
 		print('ending test command')
