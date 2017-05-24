@@ -75,7 +75,7 @@ class svnController():
 		except:
 			sublime.status_message( "SVN command failed." );
 			return ""
-		return proc.communicate()[0];
+		return proc.communicate()[0].strip( );
 
 	def get_history(self):
 		s = sublime.load_settings('Preferences.sublime-settings')
@@ -106,6 +106,16 @@ class svnController():
 		s = sublime.load_settings('Preferences.sublime-settings')
 
 		return s.get('SVN.show_status_bar_info', 1)
+
+	def show_output_panel(self, outputStr):
+		window = sublime.active_window()
+		output = window.get_output_panel("SVN"); 
+
+		edit = output.begin_edit()
+
+		output.insert(edit, 0, outputStr)
+		window.run_command("show_panel", {"panel": "output.SVN"});
+		edit = output.end_edit(edit)
 
 		
 class svnCommitCommand(sublime_plugin.TextCommand, svnController):
@@ -321,9 +331,7 @@ class svnUpdateRepoCommand(sublime_plugin.TextCommand, svnController):
 			view = sublime.active_window().active_view();
 			sublime.set_timeout(functools.partial(view.run_command, 'revert'), 0)
 
-			newView = sublime.active_window().new_file();
-			newView.insert(self.edit, 0, procTextPre);
-			newView.set_scratch(1);
+			self.show_output_panel(procTextPre)
 		else:
 			procText = "Could not commit revision; check for conflicts or other issues."
 
@@ -367,6 +375,13 @@ class svnAddFileCommand(sublime_plugin.TextCommand, svnController):
 	def is_enabled(self):
 		return len(str(self.get_svn_dir())) != 0
 
+class svnRepoStatusCommand(sublime_plugin.TextCommand, svnController):
+	def run(self, edit):
+		self.svnDir = self.get_scoped_path('repo')
+		procText = self.run_svn_command([ "svn", "status", self.svnDir]);
+		self.show_output_panel(procText)
+
+
 class svnSetScopeCommand(sublime_plugin.ApplicationCommand, svnController):
 	def run(self, scope):
 		s = sublime.load_settings('Preferences.sublime-settings')
@@ -376,6 +391,7 @@ class svnSetScopeCommand(sublime_plugin.ApplicationCommand, svnController):
 	def is_checked(self, scope):
 		selScope = self.get_commit_scope()
 		return selScope == scope
+
 
 
 
@@ -393,11 +409,20 @@ class svnEventListener(sublime_plugin.EventListener, svnController):
 				view.set_status('AABsvnTool', 'Scope: ' + str(self.get_commit_scope()))
 				if self.show_diff() == 1:
 					self.svnDir = self.get_scoped_path('file')
-					procText = self.run_svn_command([ "svn", "diff", self.svnDir]);
+					procText = self.run_svn_command([ "svn", "status", self.svnDir])
+
 					if len(procText):
-						view.set_status('AACsvnTool', 'diff:' + u'\u2260' )
+						procText = procText.split( '\n' )[0].strip( )
+						procText = procText.split( )[0]
+
+						if procText == 'M':
+							view.set_status('AACsvnTool', 'diff:' + u'\u2260' )
+						else:
+							view.set_status('AACsvnTool', 'diff:' + u'\u003D' )
 					else:
 						view.set_status('AACsvnTool', 'diff:' + u'\u003D' )
+
+
 				else: 
 					view.set_status('AACsvnTool', '')
 		else:
@@ -413,19 +438,15 @@ class svnEventListener(sublime_plugin.EventListener, svnController):
 class svnTestCommand(sublime_plugin.TextCommand, svnController):
 	def run(self, edit):
 		print('starting test command')
-		# sublime.active_window().create_output_panel("test")
-		# test = sublime.ok_cancel_dialog('test')
-		# print(test)
 
-		# self.svnDir = self.get_scoped_path('file')
-		# procText = self.run_svn_command([ "svn", "log", self.svnDir]);
-		# # procText = procText.strip( ).split( '\n' )[0].strip( );
-		# newView = sublime.active_window().new_file();
-		# newView.insert(edit, 0, procText);
+		self.svnDir = self.get_scoped_path('repo')
+		procText = self.run_svn_command([ "svn", "status", self.svnDir]);
+		self.show_output_panel(procText)
 
-		# print(procText)
+
+
+
+
 		print('ending test command')
 
-	def do_ok(self):
-		print('test')
 
