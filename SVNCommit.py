@@ -3,6 +3,7 @@ import sublime_plugin
 import os.path
 import subprocess
 import functools
+import datetime
 
 sublime.avibeSVNCommitTicketNo = ""
 sublime.avibeSVNCommitThisComment = ""
@@ -10,10 +11,10 @@ sublime.avibeSVNCommitLastComment = ""
 sublime.avibeSVNCommitScopes = ['Commit Scope: Full Repository','Commit Scope: Current File','Commit Scope: Current Directory']
 sublime.avibeSVNScopes = ['Full Repository','Current File','Current Directory']
 
+def svn_settings():
+	return sublime.load_settings( 'Preferences.sublime-settings' )
+
 class svnController():
-	def get_commit_scope(self):
-		s = sublime.load_settings('Preferences.sublime-settings')
-		return s.get('SVN.commit_scope', 'repo')
 
 	def get_svn_root_path(self):
 		path = sublime.active_window().active_view().file_name( ).split( "\\" )
@@ -72,20 +73,14 @@ class svnController():
 						stdout=subprocess.PIPE,
 						stderr=subprocess.STDOUT,
 						startupinfo=startupinfo);
-		except:
+		except ValueError:
+			print(ValueError)
 			sublime.status_message( "SVN command failed." );
 			return ""
 		return proc.communicate()[0].strip( );
 
-	def get_history(self):
-		s = sublime.load_settings('Preferences.sublime-settings')
-
-		return s.get('SVN.history', [])
-
 	def add_history(self, log):
-		s = sublime.load_settings('Preferences.sublime-settings')
-
-		history = s.get('SVN.history', [])
+		history = svn_settings().get('SVN.history', [])
 
 		for item in list(history):
 			if item == log:
@@ -94,18 +89,8 @@ class svnController():
 		history.reverse()
 		history.append(log);
 		history.reverse();
-		s.set('SVN.history', history)
+		svn_settings().set('SVN.history', history)
 		sublime.save_settings('Preferences.sublime-settings')
-
-	def show_diff(self):
-		s = sublime.load_settings('Preferences.sublime-settings')
-
-		return s.get('SVN.show_diff_in_status_bar', 0)
-
-	def show_status_bar(self):
-		s = sublime.load_settings('Preferences.sublime-settings')
-
-		return s.get('SVN.show_status_bar_info', 1)
 
 	def show_output_panel(self, outputStr):
 		window = sublime.active_window()
@@ -117,14 +102,63 @@ class svnController():
 		window.run_command("show_panel", {"panel": "output.SVN"});
 		edit = output.end_edit(edit)
 
-		
+	def do_commit(self, message):
+		if self.svnDir == None:
+			sublime.status_message( "No files selected to commit." );
+			return
+
+		if svn_settings().get('SVN.confirm_new_files_on_commit', 1):
+			if self.first_commit(message):
+				if sublime.ok_cancel_dialog("This file has not been commited to SVN using this message before. Would you like to continue?"):
+					test = 1
+				else:
+					return
+
+		procText = self.run_svn_command([ "svn", "commit", self.svnDir, "--message", message]);
+
+		procText = procText.strip( ).split( '\n' )[-1].strip( );
+
+		if not "Committed revision" in procText:
+			procText = "Could not commit revision; check for conflicts or other issues."
+
+		self.add_history(message)
+
+		sublime.status_message( procText + " (" + message + ")" );
+
+	def first_commit(self, message):
+		is_first_commit = 1
+
+		activeFile = self.get_scoped_path('file')
+		logLimit = svn_settings().get('SVN.log_limit', 1000)
+		procText = self.run_svn_command([ "svn", "log", "--limit", str(logLimit), activeFile]);
+		lineArray = procText.strip( ).split( '\n' )
+
+		for line in lineArray:
+			if line[:1] == 'r':
+				continue
+			if line[:10] == '----------':
+				continue
+			if message in line:
+				is_first_commit = 0
+				break
+
+		return is_first_commit
+
+class ChangeLog(sublime_plugin.TextCommand, svnController):
+	def run(self, edit):
+		procText = self.run_svn_command([ "svn", "log", "-v", self.svnDir]);
+
+		show_output_panel(procText)
+
+
+
 class svnCommitCommand(sublime_plugin.TextCommand, svnController):
 	def run(self, edit):
 		self.svnDir = self.get_svn_dir()
 		if len(self.svnDir) == 0:
 			return;
 
-		self.svnDir = self.get_scoped_path(self.get_commit_scope())
+		self.svnDir = self.get_scoped_path(svn_settings().get('SVN.commit_scope', 'repo'))
 
 		sublime.active_window().run_command("save")
 		sublime.active_window().show_input_panel("Ticket number:", sublime.avibeSVNCommitTicketNo, self.on_ticket, None, None)
@@ -147,16 +181,7 @@ class svnCommitCommand(sublime_plugin.TextCommand, svnController):
 
 		sublime.avibeSVNCommitLastComment = sublime.avibeSVNCommitLastComment + sublime.avibeSVNCommitThisComment
 
-		procText = self.run_svn_command([ "svn", "commit", self.svnDir, "--message", sublime.avibeSVNCommitLastComment]);
-
-		procText = procText.strip( ).split( '\n' )[-1].strip( );
-
-		if not "Committed revision" in procText:
-			procText = "Could not commit revision; check for conflicts or other issues."
-
-		self.add_history(sublime.avibeSVNCommitLastComment)
-
-		sublime.status_message( procText + " (" + sublime.avibeSVNCommitLastComment + ")" );
+		self.do_commit(sublime.avibeSVNCommitLastComment)
 
 	def is_enabled(self):
 		return len(str(self.get_svn_dir())) != 0
@@ -171,18 +196,11 @@ class svnCommitLastCommand(sublime_plugin.TextCommand, svnController):
 			sublime.status_message( "Commit with comment (CTRL-ALT-B twice) to use this shortcut." );
 			return
 
-		self.svnDir = self.get_scoped_path(self.get_commit_scope())
+		self.svnDir = self.get_scoped_path(svn_settings().get('SVN.commit_scope', 'repo'))
 
 		sublime.active_window().run_command("save")
 
-		procText = self.run_svn_command([ "svn", "commit", self.svnDir, "--message", sublime.avibeSVNCommitLastComment]);
-
-		procText = procText.strip( ).split( '\n' )[-1].strip( );
-
-		if not "Committed revision" in procText:
-			procText = "Could not commit revision; check for conflicts or other issues."
-
-		sublime.status_message( procText + " (" + sublime.avibeSVNCommitLastComment + ")" );
+		self.do_commit(sublime.avibeSVNCommitLastComment)
 
 	def is_enabled(self):
 		return len(str(self.get_svn_dir())) != 0
@@ -193,17 +211,11 @@ class svnCommitBlankCommand(sublime_plugin.TextCommand, svnController):
 		if len(self.svnDir) == 0:
 			return;
 
-		self.svnDir = self.get_scoped_path(self.get_commit_scope())
+		self.svnDir = self.get_scoped_path(svn_settings().get('SVN.commit_scope', 'repo'))
 
 		sublime.active_window().run_command("save")
-		procText = self.run_svn_command([ "svn", "commit", self.svnDir, "--message", ""]);
 
-		procText = procText.strip( ).split( '\n' )[-1].strip( );
-
-		if not "Committed revision" in procText:
-			procText = "Could not commit revision; check for conflicts or other issues."
-
-		sublime.status_message( procText );
+		self.do_commit("")
 
 	def is_enabled(self):
 		return len(str(self.get_svn_dir())) != 0
@@ -214,9 +226,9 @@ class svnCommitHistoryCommand(sublime_plugin.TextCommand, svnController):
 		if len(self.svnDir) == 0:
 			return;
 
-		self.svnDir = self.get_scoped_path(self.get_commit_scope())	
+		self.svnDir = self.get_scoped_path(svn_settings().get('SVN.commit_scope', 'repo'))	
 
-		self.fileList = list(self.get_history())
+		self.fileList = list(svn_settings().get('SVN.history', []))
 		self.fileList.insert(min(len(self.fileList), 1), 'New Log')
 
 		sublime.active_window().show_quick_panel(self.fileList, self.on_ticket)
@@ -230,23 +242,15 @@ class svnCommitHistoryCommand(sublime_plugin.TextCommand, svnController):
 			elif message == 'New Log':
 				sublime.active_window().run_command('svn_commit')
 			else:
-
-				procText = self.run_svn_command([ "svn", "commit", self.svnDir, "--message", message]);
-
-				procText = procText.strip( ).split( '\n' )[-1].strip( );
-
-				if not "Committed revision" in procText:
-					procText = "Could not commit revision; check for conflicts or other issues."
-
-				self.add_history(message)
-
-				sublime.status_message( procText + " (" + message + ")" );
+				self.do_commit(message)
 
 		except ValueError:
 			pass
 
 	def is_enabled(self):
 		return len(str(self.get_svn_dir())) != 0
+
+
 
 class svnShowChangesCommand(sublime_plugin.TextCommand, svnController):
 	def run(self, edit):
@@ -381,15 +385,17 @@ class svnRepoStatusCommand(sublime_plugin.TextCommand, svnController):
 		procText = self.run_svn_command([ "svn", "status", self.svnDir]);
 		self.show_output_panel(procText)
 
+	def is_enabled(self):
+		return len(str(self.get_svn_dir())) != 0
+
 
 class svnSetScopeCommand(sublime_plugin.ApplicationCommand, svnController):
 	def run(self, scope):
-		s = sublime.load_settings('Preferences.sublime-settings')
-		s.set('SVN.commit_scope', scope)
+		svn_settings().set('SVN.commit_scope', scope)
 		sublime.save_settings('Preferences.sublime-settings')
 
 	def is_checked(self, scope):
-		selScope = self.get_commit_scope()
+		selScope = svn_settings().get('SVN.commit_scope', 'repo')
 		return selScope == scope
 
 
@@ -398,7 +404,7 @@ class svnSetScopeCommand(sublime_plugin.ApplicationCommand, svnController):
 
 class svnEventListener(sublime_plugin.EventListener, svnController):
 	def on_activated(self, view):
-		if self.show_status_bar() == 1:
+		if svn_settings().get('SVN.show_status_bar_info', 1) == 1:
 			self.svnDir = self.get_svn_dir()
 			if len(self.svnDir) == 0:
 				view.set_status('AAAsvnTool', 'SVN:' + u'\u2718')
@@ -406,8 +412,8 @@ class svnEventListener(sublime_plugin.EventListener, svnController):
 				view.set_status('AACsvnTool', '')
 			else:
 				view.set_status('AAAsvnTool', 'SVN:' + u'\u2714')
-				view.set_status('AABsvnTool', 'Scope: ' + str(self.get_commit_scope()))
-				if self.show_diff() == 1:
+				view.set_status('AABsvnTool', 'Scope: ' + str(svn_settings().get('SVN.commit_scope', 'repo')))
+				if svn_settings().get('SVN.show_diff_in_status_bar', 0) == 1:
 					self.svnDir = self.get_scoped_path('file')
 					procText = self.run_svn_command([ "svn", "status", self.svnDir])
 
@@ -439,14 +445,48 @@ class svnTestCommand(sublime_plugin.TextCommand, svnController):
 	def run(self, edit):
 		print('starting test command')
 
-		self.svnDir = self.get_scoped_path('repo')
-		procText = self.run_svn_command([ "svn", "status", self.svnDir]);
-		self.show_output_panel(procText)
+		self.svnDir = self.get_scoped_path('repo')	
+
+		logLimit = svn_settings().get('SVN.log_limit', 1000)
+		procText = self.run_svn_command([ "svn", "log", "-v", "--limit", str(logLimit), self.svnDir]);
+		logList = procText.strip( ).split( '------------------------------------------------------------------------' );
+
+		result = ''
+
+		for log in logList:
+			if len(log) == 0:
+				continue
+
+			splitLog = str(log + "|").strip().split( '\n' );
+			print(splitLog)
+
+			logDetails = splitLog[0].split('|')
+			revision   = logDetails[0].strip( )
+			author     = logDetails[1].strip( )
+			timeStamp  = logDetails[2].strip( )
+			msgLines   = logDetails[3].strip( )
+			msgCount = int(msgLines.split(" ")[0])
+
+			splitLogLength = len(splitLog) - 1
+
+			fileList = [splitLog[num].strip( ) for num in range(2, splitLogLength - (1 + msgCount))]
+
+			messageArray = [splitLog[num].strip( ) for num in range(splitLogLength - msgCount, (splitLogLength - msgCount) + msgCount)]
+			message = '\n'.join([str(arrStr).strip( ) for arrStr in messageArray])
+
+			if len(message) == 0:
+				message = 'No Commit Message'
+
+			result += '------------------------------------------------------------------------------------------------------------------------------------------------\n'
+			result += revision + ": " + author + ": " + timeStamp + '\n'
+			result += message + '\n\n'
+			result += 'File List:\n'
+			result += '\n'.join([str(arrStr) for arrStr in fileList]) + '\n'
+			result += '\n\n'
+			
 
 
-
-
-
+		self.show_output_panel(result)
 		print('ending test command')
 
 

@@ -2,5 +2,7 @@
 	"SVN.commit_scope": "file", /* file|repo|dir */
 	"SVN.history": [],
 	"SVN.show_status_bar_info": 1,
-	"SVN.show_diff_in_status_bar": 0
+	"SVN.show_diff_in_status_bar": 0,
+	"SVN.confirm_new_files_on_commit": 1,
+	"SVN.log_limit" : 1000
 }
