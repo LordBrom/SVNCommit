@@ -10,7 +10,7 @@ sublime.avibeSVNCommitTicketNo = ""
 sublime.avibeSVNCommitThisComment = ""
 sublime.avibeSVNCommitLastComment = ""
 sublime.avibeSVNCommitScopes = ['Commit Scope: Full Repository','Commit Scope: Current File','Commit Scope: Current Directory']
-sublime.avibeSVNScopes = ['Full Repository','Current File','Current Directory']
+sublime.avibeSVNScopes = ['Current File','Current Directory','Full Repository']
 
 threadLock = threading.Lock()
 threads = []
@@ -381,14 +381,14 @@ class svnUpdateRepoCommand(sublime_plugin.TextCommand, svnController):
         if index == -1 :
             return
         elif index == 0:
-            self.svnDir = self.get_scoped_path('repo')
-            self.scope = 'Repository'
-        elif index == 1:
             self.svnDir = self.get_scoped_path('file')
             self.scope = 'File'
-        else:
+        elif index == 1:
             self.svnDir = self.get_scoped_path('dir')
             self.scope = 'Directory'
+        else:
+            self.svnDir = self.get_scoped_path('repo')
+            self.scope = 'Repository'
 
         procTextPre = self.run_svn_command([ "svn", "update", self.svnDir]);
         procText = procTextPre.strip( ).split( '\n' )[-1].strip( );
@@ -418,7 +418,7 @@ class svnAddFileCommand(sublime_plugin.TextCommand, svnController):
         sublime.active_window().show_quick_panel(self.confirmList, self.do_Add)
 
     def do_Add(self, index):
-        print('added')
+        # print('added')
         self.scope = ''
         if index == -1 :
             return
@@ -436,7 +436,7 @@ class svnAddFileCommand(sublime_plugin.TextCommand, svnController):
         if "Illegal target" in procText:
             procText = "Could not add file(s); check for conflicts or other issues."
         else:
-            print(procText)
+            # print(procText)
             procText = "Added file(s) to repo"
         sublime.status_message(procText);
 
@@ -479,7 +479,7 @@ class svnLogParser(svnController):
                 continue
 
             splitLog = str(log + "|").strip().split( '\n' );
-            print(splitLog)
+            # print(splitLog)
 
             logDetails = splitLog[0].split('|')
             revision   = logDetails[0].strip( )
@@ -517,7 +517,7 @@ class svnEventListener(sublime_plugin.EventListener, svnController):
         threads.append(thread)
 
     def on_post_save(self, view):
-        print(str(threads))
+        # print(str(threads))
         thread = svnUpdateStatusBarThread(view, view.file_name())
 
         thread.start()
